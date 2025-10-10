@@ -1,11 +1,29 @@
 - hosts: localhost
-  become: false  # 👈 disable sudo since Jenkins doesn’t have passwordless access
-  connection: local  # 👈 ensures Ansible runs locally, not over SSH
+  become: false           # Jenkins usually cannot use sudo without a password
+  connection: local       # Run Ansible tasks locally
+  gather_facts: false     # Optional: skip gathering facts to speed up
   tasks:
+    - name: Ensure Docker SDK for Python is installed
+      pip:
+        name: docker
+        executable: pip3
+
     - name: Pull latest Docker image
       community.docker.docker_image:
         name: sassy2341/scientific-calculator
         source: pull
+
+    - name: Stop existing container if running
+      community.docker.docker_container:
+        name: scientific-calculator
+        state: stopped
+      ignore_errors: true  # don’t fail if container doesn’t exist
+
+    - name: Remove existing container
+      community.docker.docker_container:
+        name: scientific-calculator
+        state: absent
+      ignore_errors: true
 
     - name: Run container
       community.docker.docker_container:
