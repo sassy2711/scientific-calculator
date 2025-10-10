@@ -1,13 +1,14 @@
 - hosts: localhost
-  become: true
+  become: false  # 👈 disable sudo since Jenkins doesn’t have passwordless access
+  connection: local  # 👈 ensures Ansible runs locally, not over SSH
   tasks:
     - name: Pull latest Docker image
-      docker_image:
+      community.docker.docker_image:
         name: sassy2341/scientific-calculator
         source: pull
 
     - name: Run container
-      docker_container:
+      community.docker.docker_container:
         name: scientific-calculator
         image: sassy2341/scientific-calculator:latest
         state: started
