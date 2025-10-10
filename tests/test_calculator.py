@@ -1,5 +1,5 @@
 import unittest
-from calculator import *
+from app.calculator import *
 
 class TestCalculator(unittest.TestCase):
     def test_square_root(self):
