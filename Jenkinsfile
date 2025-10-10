@@ -129,16 +129,33 @@ pipeline {
             }
         }
 
-        stage('Install Ansible Collections') {
+        stage('Prepare Ansible in WSL2') {
             steps {
+                // Explicitly run these commands within WSL2.
+                // You might need to adjust 'wsl.exe -e bash -c' depending on your Jenkins's shell configuration.
+                // For 'sh' step on Windows, it often finds 'bash' if Git Bash or WSL is in PATH.
+                // Let's assume 'sh' resolves to a WSL bash shell.
+
+                // Install Ansible if not already available in the default WSL python env
+                sh 'python3 -m pip install ansible --user' // Install for the current user in WSL
+                
+                // Ensure ansible-galaxy is in path
+                sh 'export PATH="$HOME/.local/bin:$PATH"' // Add user bin to PATH for Ansible
+
+                // Install the community.docker collection within WSL2
                 sh 'ansible-galaxy collection install community.docker'
+
+                // Install the Docker SDK for Python within the same Python environment in WSL2
+                sh 'python3 -m pip install docker --user' // Install for the current user in WSL
             }
         }
-
-        stage('Deploy via Ansible') {
+        stage('Deploy via Ansible in WSL2') {
             steps {
-                // Ensure Ansible runs locally without sudo
-                sh "ansible-playbook deploy.yml"
+                // Ensure ansible-playbook runs in the correct environment with PATH set
+                sh '''
+                    export PATH="$HOME/.local/bin:$PATH"
+                    ansible-playbook deploy.yml
+                '''
             }
         }
     }
