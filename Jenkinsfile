@@ -130,25 +130,27 @@ pipeline {
         }
 
         stage('Prepare Ansible in WSL2') {
-            steps {
-                // Explicitly run these commands within WSL2.
-                // You might need to adjust 'wsl.exe -e bash -c' depending on your Jenkins's shell configuration.
-                // For 'sh' step on Windows, it often finds 'bash' if Git Bash or WSL is in PATH.
-                // Let's assume 'sh' resolves to a WSL bash shell.
+                steps {
+                    // *** CRITICAL: UPGRADE ANSIBLE ***
+                    // We need to ensure Ansible itself is a newer version that correctly supports collections.
+                    // The system-installed Ansible 2.9.6 is too old.
+                    sh 'python3 -m pip install --upgrade ansible --user'
+                    
+                    // Add user bin to PATH for Ansible and other user-installed Python executables
+                    sh 'export PATH="$HOME/.local/bin:$PATH"' 
 
-                // Install Ansible if not already available in the default WSL python env
-                sh 'python3 -m pip install ansible --user' // Install for the current user in WSL
-                
-                // Ensure ansible-galaxy is in path
-                sh 'export PATH="$HOME/.local/bin:$PATH"' // Add user bin to PATH for Ansible
+                    // Install the community.docker collection within WSL2
+                    // It will likely skip as it's installed, but this ensures it's there.
+                    sh 'ansible-galaxy collection install community.docker'
 
-                // Install the community.docker collection within WSL2
-                sh 'ansible-galaxy collection install community.docker'
+                    // Install/ensure the Docker SDK for Python is installed within the same Python environment in WSL2
+                    // It will likely skip as it's installed, but this ensures it's there.
+                    sh 'python3 -m pip install docker --user' 
 
-                // Install the Docker SDK for Python within the same Python environment in WSL2
-                sh 'python3 -m pip install docker --user' // Install for the current user in WSL
+                    // OPTIONAL: Add a debug step to verify Ansible version
+                    sh 'ansible --version'
+                }
             }
-        }
         stage('Deploy via Ansible in WSL2') {
             steps {
                 // Ensure ansible-playbook runs in the correct environment with PATH set
