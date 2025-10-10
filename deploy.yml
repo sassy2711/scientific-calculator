@@ -1,4 +1,6 @@
 - hosts: localhost
+  collections:
+    - community.docker
   become: false           # Jenkins usually cannot use sudo without a password
   connection: local       # Run Ansible tasks locally
   gather_facts: false     # Optional: skip gathering facts to speed up
