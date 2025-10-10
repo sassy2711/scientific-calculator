@@ -129,6 +129,12 @@ pipeline {
             }
         }
 
+        stage('Install Ansible Collections') {
+            steps {
+                sh 'ansible-galaxy collection install community.docker'
+            }
+        }
+
         stage('Deploy via Ansible') {
             steps {
                 // Ensure Ansible runs locally without sudo
