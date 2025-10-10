@@ -105,8 +105,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                // Discover tests inside app/tests folder
-                sh 'python3 -m unittest discover -s app/tests -p "*.py"'
+                sh 'python3 -m unittest discover -s tests -p "test_*.py"'
             }
         }
 
