@@ -1,7 +1,6 @@
 #Main.py
 from calculator import *
 
-#menu
 def menu():
     while True:
         print("\nScientific Calculator")
